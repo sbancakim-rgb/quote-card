@@ -170,17 +170,15 @@ export default function App() {
     document.head.appendChild(link);
   }, []);
 
-  // storage에서 history 로드
+  // localStorage에서 history 로드
   useEffect(() => {
-    (async () => {
-      try {
-        const saved = await window.storage.get("quote_history");
-        if (saved) {
-          const parsed = JSON.parse(saved.value);
-          if (Array.isArray(parsed) && parsed.length > 0) setHistory(parsed);
-        }
-      } catch {}
-    })();
+    try {
+      const saved = localStorage.getItem("quote_history");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) setHistory(parsed);
+      }
+    } catch {}
   }, []);
 
   useEffect(() => {
@@ -193,9 +191,9 @@ export default function App() {
       const c = miniCanvasRefs.current[i];
       if (c) document.fonts.ready.then(() => drawQuoteImage(c, item.quote_ko, item.author, item.author_info, item.style_key));
     });
-    // storage에 저장
+    // localStorage에 저장
     if (history.length > 0) {
-      window.storage.set("quote_history", JSON.stringify(history)).catch(() => {});
+      try { localStorage.setItem("quote_history", JSON.stringify(history)); } catch {}
     }
   }, [history]);
 
@@ -233,9 +231,9 @@ export default function App() {
     navigator.clipboard.writeText(message).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
   }
 
-  async function clearHistory() {
+  function clearHistory() {
     if (!window.confirm("저장된 명언 기록을 모두 삭제할까요?")) return;
-    try { await window.storage.delete("quote_history"); } catch {}
+    try { localStorage.removeItem("quote_history"); } catch {}
     setHistory([]);
     miniCanvasRefs.current = [];
   }
